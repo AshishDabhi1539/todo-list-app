@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="App">
+        <div class="abc">
+            <h1>Todo List App</h1>
+            <input type="text" id="newTodo" placeholder="Enter a new todo">
+            <button onclick="addTodo()">Add Todo</button>
+            <ul id="todoList"></ul>
+            <h2>Completed Todos</h2>
+            <ul id="completedTodoList"></ul>
+        </div>
+    </div>
+
+    <script>
+        let todos = [];
+        let completedTodos = [];
+        let editIndex = null;
+
+        function addTodo() {
+            const newTodoInput = document.getElementById('newTodo');
+            const newTodo = newTodoInput.value.trim();
+            if (newTodo !== '') {
+                todos.push({ text: newTodo, completed: false });
+                newTodoInput.value = '';
+                renderTodos();
+            }
+        }
+
+        function removeTodo(index) {
+            todos.splice(index, 1);
+            renderTodos();
+        }
+
+        function toggleCompleted(index) {
+            todos[index].completed = !todos[index].completed;
+            if (todos[index].completed) {
+                completedTodos.push(todos[index]);
+            } else {
+                completedTodos = completedTodos.filter(todo => todo !== todos[index]);
+            }
+            renderTodos();
+        }
+
+        function editTodo(index) {
+            editIndex = index;
+            renderTodos();
+        }
+
+        function saveEdit() {
+            const editedTodo = document.getElementById('editInput').value.trim();
+            if (editedTodo !== '') {
+                todos[editIndex].text = editedTodo;
+                editIndex = null;
+                renderTodos();
+            }
+        }
+
+        function cancelEdit() {
+            editIndex = null;
+            renderTodos();
+        }
+
+        function deleteCompletedTodos(index) {
+            completedTodos.splice(index, 1);
+            renderTodos();
+        }
+
+        function renderTodos() {
+            const todoList = document.getElementById('todoList');
+            const completedTodoList = document.getElementById('completedTodoList');
+
+            todoList.innerHTML = '';
+            completedTodoList.innerHTML = '';
+
+            todos.forEach((todo, index) => {
+                const todoItem = document.createElement('li');
+                todoItem.className = todo.completed ? 'completed' : '';
+
+                if (editIndex === index) {
+                    todoItem.innerHTML = `
+                        <input type="text" id="editInput" value="${todo.text}">
+                        <button onclick="saveEdit()">Save</button>
+                        <button onclick="cancelEdit()">Cancel</button>
+                    `;
+                } else {
+                    todoItem.innerHTML = `
+                        ${todo.text}
+                        <button onclick="toggleCompleted(${index})">
+                            ${todo.completed ? 'Undo' : 'Complete'}
+                        </button>
+                        <button onclick="editTodo(${index})">Edit</button>
+                        <button onclick="removeTodo(${index})">Remove</button>
+                    `;
+                }
+
+                todoList.appendChild(todoItem);
+            });
+
+            completedTodos.forEach((todo, index) => {
+                const todoItem = document.createElement('li');
+                todoItem.innerHTML = `
+                    ${todo.text}
+                    <button onclick="deleteCompletedTodos(${index})">Delete</button>
+                `;
+                completedTodoList.appendChild(todoItem);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', renderTodos);
+    </script>
+</body>
+</html>
